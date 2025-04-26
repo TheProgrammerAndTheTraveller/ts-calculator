@@ -1,0 +1,10 @@
+.calculator-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 3 столбца одинаковой ширины */
+    grid-template-rows: repeat(5, 1fr);
+    gap: 10px; /* отступ между кнопками */
+    width: 300px; /* можно настроить */
+    height: 300px;
+    margin: 0 auto;
+    padding: 20px;
+  }
