@@ -3,17 +3,46 @@ import { CalculatorAction } from "./CalculatorActions";
 import CalculatorButton from "./CalculatorButton";
 
 function ActionButton({ value }: { value: CalculatorAction }) {
-    const context = useCalculatorContext()
+    const {
+        currentValue,
+        oldValue,
+        currentAction,
+        setCurrentValue,
+        setOldValue,
+        setCurrentAction
+    } = useCalculatorContext();
 
     function onActionClick(): void {
-        const { oldValue, currentValue, currentAction, setOldValue, setCurrentValue, setCurrentAction } = context;
-    
         const input = currentValue ?? oldValue;
-    
-        
-        if (currentAction && currentValue != null) {
+
+        // Обработка CLEAR
+        if (value === CalculatorAction.Clear) {
+            setCurrentValue(0);
+            setOldValue(0);
+            setCurrentAction(null);
+            return;
+        }
+
+        // Обработка односторонних операций
+        if (value === CalculatorAction.Reciprocal && input !== 0) {
+            setCurrentValue(1 / input);
+            return;
+        }
+
+        if (value === CalculatorAction.Square) {
+            setCurrentValue(input * input);
+            return;
+        }
+
+        if (value === CalculatorAction.Sqrt) {
+            setCurrentValue(Math.sqrt(input));
+            return;
+        }
+
+        // Обработка Equals
+        if (value === CalculatorAction.Equals && currentAction && currentValue != null) {
             let result = oldValue;
-    
+
             switch (currentAction) {
                 case CalculatorAction.Add:
                     result = oldValue + currentValue;
@@ -31,24 +60,64 @@ function ActionButton({ value }: { value: CalculatorAction }) {
                     }
                     result = oldValue / currentValue;
                     break;
-                default:
-                    return; 
             }
-    
-            setOldValue(result);        
-            setCurrentValue(null);      
-            setCurrentAction(value);    
+
+            setCurrentValue(result);
+            setOldValue(result);
+            setCurrentAction(null);
             return;
         }
-    
-        
-        setOldValue(input);
-        setCurrentValue(null);
-        setCurrentAction(value);
+
+        // Если есть текущая операция и новое значение — выполнить промежуточный результат
+        if (
+            currentAction &&
+            currentValue != null &&
+            (value === CalculatorAction.Add ||
+                value === CalculatorAction.Subtract ||
+                value === CalculatorAction.Multiply ||
+                value === CalculatorAction.Divide)
+        ) {
+            let result = oldValue;
+
+            switch (currentAction) {
+                case CalculatorAction.Add:
+                    result = oldValue + currentValue;
+                    break;
+                case CalculatorAction.Subtract:
+                    result = oldValue - currentValue;
+                    break;
+                case CalculatorAction.Multiply:
+                    result = oldValue * currentValue;
+                    break;
+                case CalculatorAction.Divide:
+                    if (currentValue === 0) {
+                        alert("Деление на ноль невозможно");
+                        return;
+                    }
+                    result = oldValue / currentValue;
+                    break;
+            }
+
+            setOldValue(result);
+            setCurrentValue(null);
+            setCurrentAction(value);
+            return;
+        }
+
+        // Начало новой операции
+        if (
+            value === CalculatorAction.Add ||
+            value === CalculatorAction.Subtract ||
+            value === CalculatorAction.Multiply ||
+            value === CalculatorAction.Divide
+        ) {
+            setOldValue(input);
+            setCurrentValue(null);
+            setCurrentAction(value);
+        }
     }
 
-    return <CalculatorButton onClick={onActionClick} title={value} />
+    return <CalculatorButton onClick={onActionClick} title={value} />;
 }
+
 export default ActionButton;
-//при нажатии на кнопку если текущий action null тогда надо записать то что в кнопке в action а текущее число из контекста которое там есть записать в предыдущее значение
-//иначе выполнить действие в кнопке в зависимости от enum и результат записать в текущее значение
