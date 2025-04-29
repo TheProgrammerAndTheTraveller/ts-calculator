@@ -6,45 +6,45 @@ function ActionButton({ value }: { value: CalculatorAction }) {
     const context = useCalculatorContext()
 
     function onActionClick(): void {
-        const oldValue = context.oldValue;
-        const currentValue = context.currentValue ?? context.oldValue;
-        if (context.currentAction) {
-            let result: number = 0;
-
-            switch (value) {
+        const { oldValue, currentValue, currentAction, setOldValue, setCurrentValue, setCurrentAction } = context;
+    
+        const input = currentValue ?? oldValue;
+    
+        
+        if (currentAction && currentValue != null) {
+            let result = oldValue;
+    
+            switch (currentAction) {
                 case CalculatorAction.Add:
-                    result = currentValue + oldValue;
+                    result = oldValue + currentValue;
                     break;
                 case CalculatorAction.Subtract:
+                    result = oldValue - currentValue;
                     break;
                 case CalculatorAction.Multiply:
+                    result = oldValue * currentValue;
                     break;
                 case CalculatorAction.Divide:
+                    if (currentValue === 0) {
+                        alert("Деление на ноль невозможно");
+                        return;
+                    }
+                    result = oldValue / currentValue;
                     break;
-                case CalculatorAction.Clear:
-                    break;
-                case CalculatorAction.Equals:
-                    break;
-                case CalculatorAction.Comma:
-                    break;
-                case CalculatorAction.Reciprocal:
-                    break;
-                case CalculatorAction.Square:
-                    break;
-                case CalculatorAction.Sqrt:
-                    break;
+                default:
+                    return; 
             }
-            context.setOldValue(result);
-            context.setCurrentValue(null)
+    
+            setOldValue(result);        
+            setCurrentValue(null);      
+            setCurrentAction(value);    
             return;
         }
-
-        if (context.currentAction === CalculatorAction.Equals)
-            return;
-
-        context.setCurrentAction(value)
-        context.setOldValue(currentValue)
-        context.setCurrentValue(null)
+    
+        
+        setOldValue(input);
+        setCurrentValue(null);
+        setCurrentAction(value);
     }
 
     return <CalculatorButton onClick={onActionClick} title={value} />
